@@ -704,7 +704,7 @@ if __name__ == "__main__":
             args.uncipher = int(args.uncipher)
         args.uncipher = n2s(args.uncipher)
 
-    elif args.uncipherfile is not None and not any(i in 'abs*' for i in ['*','?']):
+    elif args.uncipherfile is not None and not any(i in args.uncipherfile for i in ['*','?']):
         cipher = open(args.uncipherfile, 'rb').read()
         args.uncipher = cipher
 
