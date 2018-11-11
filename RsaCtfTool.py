@@ -119,7 +119,7 @@ class RSAAttack(object):
 
             # Try to build new key if e is huge (so d is small) and after try wiener on this new key
             self.same_n_huge_e_attack()
-            if '*' in args.uncipherfile or '?' in args.uncipherfile:
+            if args.uncipherfile is not None and any(i in 'abs*' for i in ['*','?']):
                 # get list of ciphers from wildcard expression
                 self.uncipherlist = glob(args.uncipherfile)
                 if len(self.uncipherlist) != len(self.pubkeyfilelist):
@@ -704,7 +704,7 @@ if __name__ == "__main__":
             args.uncipher = int(args.uncipher)
         args.uncipher = n2s(args.uncipher)
 
-    elif args.uncipherfile is not None and '*' not in args.uncipherfile:
+    elif args.uncipherfile is not None and not any(i in 'abs*' for i in ['*','?']):
         cipher = open(args.uncipherfile, 'rb').read()
         args.uncipher = cipher
 
