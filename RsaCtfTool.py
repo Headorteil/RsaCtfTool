@@ -464,11 +464,15 @@ class RSAAttack(object):
                 print("Modulus are not equal, common modulus attack impossible.")
             return
         n = self.attackobjs[0].pub_key.n
-        [e2, e1] = [ self.attackobjs[k].pub_key.e for k in range(2) ]
-        [c1, c2] = [ int(binascii.hexlify(
-                          base64.b64decode(self.attackobjs[k].cipher)
-                         ),16)
-                    for k in range(2)]
+        [e1, e2] = [ self.attackobjs[k].pub_key.e for k in range(2) ]
+        try:
+            [c1, c2] = [ int(binascii.hexlify(
+			      base64.b64decode(self.attackobjs[k].cipher)
+			     ),16)
+			  for k in range(2)]
+        except binascii.Error:
+            [c1, c2] = [ int(binascii.hexlify(self.attackobjs[k].cipher),16)
+			  for k in range(2)]
         CM = CommonModulusAttack()
         CM.extended_euclidean(e1, e2)
         CM.modular_inverse(c1, c2, n)
