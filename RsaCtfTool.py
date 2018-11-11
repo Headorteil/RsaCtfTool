@@ -610,7 +610,8 @@ class RSAAttack(object):
 
     implemented_attacks = [nullattack, hastads, factordb, pastctfprimes,
                            mersenne_primes, noveltyprimes, smallq, wiener,
-                           comfact_cn, primefac, fermat, siqs, Pollard_p_1]
+                           comfact_cn, primefac, fermat, siqs, Pollard_p_1, 
+                           commonmodulus]
 
 
 # source http://stackoverflow.com/a/22348885

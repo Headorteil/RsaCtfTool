@@ -13,6 +13,7 @@ Attacks :
  - Past CTF Primes method
  - Self-Initializing Quadratic Sieve (SIQS) using Yafu
  - Common factor attacks across multiple keys
+ - Common modulus attacks across multiple keys and multiple cipher files
  - Small fractions method when p/q is close to a small fraction
  - Boneh Durfee Method when the private exponent d is too small compared to the modulus (i.e d < n^0.292)
  - Elliptic Curve Method
@@ -26,7 +27,7 @@ usage: RsaCtfTool.py [-h] [--publickey PUBLICKEY] [--createpub] [--dumpkey]
                      [--uncipherfile UNCIPHERFILE] [--uncipher UNCIPHER]
                      [--verbose] [--private] [--ecmdigits ECMDIGITS] [-n N]
                      [-p P] [-q Q] [-e E] [--key KEY]
-                     [--attack {hastads,factordb,pastctfprimes,mersenne_primes,noveltyprimes,smallq,wiener,comfact_cn,primefac,fermat,siqs,Pollard_p_1,all}]
+                     [--attack {hastads,factordb,pastctfprimes,mersenne_primes,noveltyprimes,smallq,wiener,comfact_cn,primefac,fermat,siqs,Pollard_p_1,commonmodulus,all}]
 ```
 
 Mode 1 - Attack RSA (specify --publickey)
@@ -49,6 +50,9 @@ Mode 3 - Dump the public and/or private numbers from a PEM/DER format public or 
 
 ### Attempt to break multiple public keys with common factor attacks or individually - use quotes around wildcards to stop bash expansion
 `./RsaCtfTool.py --publickey "*.pub" --private`
+
+### Attempt to break ciphers using multiple public keys and multiple cipher files - use quotes around wildcards to stop bash expansion
+`./RsaCtfTool.py --publickey "*.pub" --uncipherfile "*.cipher"`
 
 ### Generate a public key :
 `./RsaCtfTool.py --createpub -n 7828374823761928712873129873981723...12837182 -e 65537`
