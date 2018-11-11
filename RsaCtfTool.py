@@ -25,7 +25,8 @@ import subprocess
 from glob import glob
 import tempfile
 import sys
-
+import base64
+import binascii
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 sys.setrecursionlimit(2000)
@@ -106,25 +107,42 @@ class PrivateKey(object):
         return self.key.exportKey().decode("utf-8")
 
 
-class RSAAttack(object):
+class RSAAttack(object): 
     def __init__(self, args):
         if '*' in args.publickey or '?' in args.publickey:
             # get list of public keys from wildcard expression
             self.pubkeyfilelist = glob(args.publickey)
-            self.args = args
-
+            self.args = args  
+            self.attackobjs = []
             if args.verbose:
                 print("[*] Multikey mode using keys: " + repr(self.pubkeyfilelist))
 
-            self.attackobjs = []
-
             # Try to build new key if e is huge (so d is small) and after try wiener on this new key
             self.same_n_huge_e_attack()
+            if '*' in args.uncipherfile or '?' in args.uncipherfile:
+                # get list of ciphers from wildcard expression
+                self.uncipherlist = glob(args.uncipherfile)
+                if len(self.uncipherlist) != len(self.pubkeyfilelist):
+                    if args.verbose:
+                        print("It has to be the same number of keys and ciphers")
+                        quit()
+                self.args = args
 
-            # Initialize a list of objects by recursively calling this on each key
-            for pub in self.pubkeyfilelist:
-                args.publickey = pub  # is this a kludge or is this elegant?
-                self.attackobjs.append(RSAAttack(args))
+                if args.verbose:
+                    print("[*] Multiciphers mode using ciphers: " + repr(self.uncipherlist))
+
+                # Initialize a list of objects by recursively calling this on each key and cipher
+                for i in range(len(self.uncipherlist)):
+                    args.publickey = self.pubkeyfilelist[i]
+                    cipher = open(self.uncipherlist[i], "rb").read()
+                    args.uncipher = cipher
+                    self.attackobjs.append(RSAAttack(args))
+            else:
+
+                # Initialize a list of objects by recursively calling this on each key
+                for pub in self.pubkeyfilelist:
+                    args.publickey = pub  # is this a kludge or is this elegant?
+                    self.attackobjs.append(RSAAttack(args))
 
         else:
             # Load single public key
@@ -139,6 +157,7 @@ class RSAAttack(object):
             self.args = args
             self.unciphered = None
             self.attackobjs = None  # This is how we'll know this object represents 1 key
+            self.plaintext = None
 
             # Read n/e from publickey file
             if not args.n or not args.e:
@@ -159,6 +178,7 @@ class RSAAttack(object):
                 self.cipher = args.uncipher
             else:
                 self.cipher = None
+
         return
 
     def same_n_huge_e_attack(self):
@@ -391,7 +411,7 @@ class RSAAttack(object):
         return
 
     def commonfactors(self):
-        # Try to find the gcd between each pair of modulii and resolve the private keys if gcd > 1
+        # Try to find the gcd between each pair of moduli and resolve the private keys if gcd > 1
         for x in self.attackobjs:
             for y in self.attackobjs:
                 if x.pub_key.n != y.pub_key.n:
@@ -432,7 +452,28 @@ class RSAAttack(object):
         return
 
     def commonmodulus(self):
-        # NYI requires support for multiple public keys
+        try:
+            from commonmodulus_attack import CommonModulusAttack
+        except ImportError:
+            if self.args.verbose:
+                print("[!] Warning: Common modulus attack module.")
+            return
+        # Common modulus attack
+        if self.attackobjs[0].pub_key.n != self.attackobjs[1].pub_key.n:
+            if self.args.verbose:
+                print("Modulus are not equal, common modulus attack impossible.")
+            return
+        n = self.attackobjs[0].pub_key.n
+        [e2, e1] = [ self.attackobjs[k].pub_key.e for k in range(2) ]
+        [c1, c2] = [ int(binascii.hexlify(
+                          base64.b64decode(self.attackobjs[k].cipher)
+                         ),16)
+                    for k in range(2)]
+        CM = CommonModulusAttack()
+        CM.extended_euclidean(e1, e2)
+        CM.modular_inverse(c1, c2, n)
+        args.plaintext=CM.print_value()
+        print(args.plaintext)
         return
 
     def prime_modulus(self):
@@ -513,8 +554,15 @@ class RSAAttack(object):
 
     def attack(self):
         if self.attackobjs is not None:
+            if self.args.verbose:
+                print("[*] Performing common factors attack.")
             self.commonfactors()
+            if self.args.verbose:
+                print("[*] Performing common modulus attack.")
+            self.commonmodulus()
             try:
+                if self.plaintext is not None:
+                    quit()
                 if self.same_n_huge_e:
                     args.attackobjs = None
                     args.publickey = self.same_n_huge_e
@@ -603,7 +651,7 @@ if __name__ == "__main__":
     parser.add_argument('--publickey', help='public key file. You can use wildcards for multiple keys.')
     parser.add_argument('--createpub', help='Take n and e from cli and just print a public key then exit', action='store_true')
     parser.add_argument('--dumpkey', help='Just dump the RSA variables from a key - n,e,d,p,q', action='store_true')
-    parser.add_argument('--uncipherfile', help='uncipher a file', default=None)
+    parser.add_argument('--uncipherfile', help='uncipher a file. You can use wildcards for multiple ciphers.', default=None)
     parser.add_argument('--uncipher', help='uncipher a cipher', default=None)
     parser.add_argument('--verbose', help='verbose mode (display n, e, p and q)', action='store_true')
     parser.add_argument('--private', help='Display private key if recovered', action='store_true')
@@ -656,7 +704,7 @@ if __name__ == "__main__":
             args.uncipher = int(args.uncipher)
         args.uncipher = n2s(args.uncipher)
 
-    elif args.uncipherfile is not None:
+    elif args.uncipherfile is not None and '*' not in args.uncipherfile:
         cipher = open(args.uncipherfile, 'rb').read()
         args.uncipher = cipher
 
@@ -721,6 +769,5 @@ if __name__ == "__main__":
         with open(tmpfile.name, "wb") as tmpfd:
             tmpfd.write(RSA.construct((args.n, args.e)).publickey().exportKey())
         args.publickey = tmpfile.name
-
     attackobj = RSAAttack(args)
     attackobj.attack()
