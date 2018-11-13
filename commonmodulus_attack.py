@@ -20,16 +20,16 @@ class CommonModulusAttack:
            while num2 != 0:
                num1, num2 = num2, num1 % num2
            return num1
-    def extended_euclidean(self, e1, e2):
+    def extended_euclidean(self):
            """
            The value a is the modular multiplicative inverse of e1 and e2.
            b is calculated from the eqn: (e1*a) + (e2*b) = gcd(e1, e2)
            :param e1: exponent 1
            :param e2: exponent 2
            """
-           self.a = gmpy2.invert(e1, e2)
-           self.b = (float(self.gcd(e1, e2)-(self.a*e1)))/float(e2)
-    def modular_inverse(self, c1, c2, N):
+           self.a = gmpy2.invert(self.attackobjs[0].cipherdec, self.attackobjs[1].cipherdec)
+           self.b = (float(self.gcd(self.attackobjs[0].cipherdec, self.attackobjs[1].cipherdec)-(self.a*self.attackobjs[0].cipherdec)))/float(self.attackobjs[1].cipherdec)
+    def modular_inverse(self):
            """
            i is the modular multiplicative inverse of c2 and N.
            i^-b is equal to c2^b. So if the value of b is -ve, we
@@ -39,9 +39,9 @@ class CommonModulusAttack:
            :param c2: cipher text 2
            :param N: Modulus
            """
-           i = gmpy2.invert(c2, N)
-           mx = pow(c1, self.a, N)
-           my = pow(i, int(-self.b), N)
+           i = gmpy2.invert(self.attackobjs[1].cipherdec, N)
+           mx = pow(self.attackobjs[0].cipherdec, self.a, N)
+           my = pow(i, int(-self.b), self.attackobjs[0].pub_key.n)
            self.m= mx * my % N
     def print_value(self):
         self.m=str(hex(self.m))[2:] #long

@@ -107,12 +107,12 @@ class PrivateKey(object):
         return self.key.exportKey().decode("utf-8")
 
 
-class RSAAttack(object): 
+class RSAAttack(object):
     def __init__(self, args):
         if '*' in args.publickey or '?' in args.publickey:
             # get list of public keys from wildcard expression
             self.pubkeyfilelist = glob(args.publickey)
-            self.args = args  
+            self.args = args
             self.attackobjs = []
             if args.verbose:
                 print("[*] Multikey mode using keys: " + repr(self.pubkeyfilelist))
@@ -464,18 +464,20 @@ class RSAAttack(object):
                 print("Modulus are not equal, common modulus attack impossible.")
             return
         n = self.attackobjs[0].pub_key.n
-        [e1, e2] = [ self.attackobjs[k].pub_key.e for k in range(2) ]
+        self.len = len(self.attackobjs)
         try:
-            [c1, c2] = [ int(binascii.hexlify(
-			      base64.b64decode(self.attackobjs[k].cipher)
-			     ),16)
-			  for k in range(2)]
+            for i in range(self.len):
+                self.attackobjs[i].cipherdec = int(binascii.hexlify(
+                                            base64.b64decode(self.attackobjs[k].cipher)
+                                            ),16)
         except binascii.Error:
-            [c1, c2] = [ int(binascii.hexlify(self.attackobjs[k].cipher),16)
-			  for k in range(2)]
+            for i in range(self.len):
+                self.attackobjs[i].cipherdec = int(binascii.hexlify(
+                                            self.attackobjs[k].cipher)
+                                            ,16)
         CM = CommonModulusAttack()
-        CM.extended_euclidean(e1, e2)
-        CM.modular_inverse(c1, c2, n)
+        CM.extended_euclidean()
+        CM.modular_inverse()
         args.plaintext=CM.print_value()
         print(args.plaintext)
         return
@@ -610,7 +612,7 @@ class RSAAttack(object):
 
     implemented_attacks = [nullattack, hastads, factordb, pastctfprimes,
                            mersenne_primes, noveltyprimes, smallq, wiener,
-                           comfact_cn, primefac, fermat, siqs, Pollard_p_1, 
+                           comfact_cn, primefac, fermat, siqs, Pollard_p_1,
                            commonmodulus]
 
 
