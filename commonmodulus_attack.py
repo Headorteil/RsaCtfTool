@@ -11,9 +11,6 @@ class CommonModulusAttack:
     def gcd(self, num1, num2):
            """
            This function os used to find the GCD of 2 numbers.
-           :param num1:
-           :param num2:
-           :return:
            """
            if num1 < num2:
                num1, num2 = num2, num1
@@ -24,8 +21,8 @@ class CommonModulusAttack:
            """
            The value a is the modular multiplicative inverse of e1 and e2.
            b is calculated from the eqn: (e1*a) + (e2*b) = gcd(e1, e2)
-           :param e1: exponent 1
-           :param e2: exponent 2
+           e1: exponent 1
+           e2: exponent 2
            """
            self.a = gmpy2.invert(self.attackobjs[0].cipherdec, self.attackobjs[1].cipherdec)
            self.b = (float(self.gcd(self.attackobjs[0].cipherdec, self.attackobjs[1].cipherdec)-(self.a*self.attackobjs[0].cipherdec)))/float(self.attackobjs[1].cipherdec)
@@ -35,13 +32,14 @@ class CommonModulusAttack:
            i^-b is equal to c2^b. So if the value of b is -ve, we
            have to find out i and then do i^-b.
            Final plain text is given by m = (c1^a) * (i^-b) %N
-           :param c1: cipher text 1
-           :param c2: cipher text 2
-           :param N: Modulus
+           c1: cipher text 1
+           c2: cipher text 2
+           N: Modulus
            """
+           N = self.attackobjs[0].pubkey.n
            i = gmpy2.invert(self.attackobjs[1].cipherdec, N)
            mx = pow(self.attackobjs[0].cipherdec, self.a, N)
-           my = pow(i, int(-self.b), self.attackobjs[0].pub_key.n)
+           my = pow(i, int(-self.b), N)
            self.m= mx * my % N
     def print_value(self):
         self.m=str(hex(self.m))[2:] #long

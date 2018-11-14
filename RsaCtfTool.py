@@ -463,7 +463,6 @@ class RSAAttack(object):
             if self.args.verbose:
                 print("Modulus are not equal, common modulus attack impossible.")
             return
-        n = self.attackobjs[0].pub_key.n
         self.len = len(self.attackobjs)
         try:
             for i in range(self.len):
@@ -479,6 +478,31 @@ class RSAAttack(object):
         CM.extended_euclidean()
         CM.modular_inverse()
         args.plaintext=CM.print_value()
+        print(args.plaintext)
+        return
+
+    def chinese(self):
+        try:
+            from chinese_attack import chinese_attack
+        except ImportError:
+            if self.args.verbose:
+                print("[!] Warning: Chinese attack module.")
+            return
+        # Chinese attack
+        self.len = len(self.attackobjs)
+        try:
+            for i in range(self.len):
+                self.attackobjs[i].cipherdec = int(binascii.hexlify(
+                                            base64.b64decode(self.attackobjs[k].cipher)
+                                            ),16)
+        except binascii.Error:
+            for i in range(self.len):
+                self.attackobjs[i].cipherdec = int(binascii.hexlify(
+                                            self.attackobjs[k].cipher)
+                                            ,16)
+        CH = chinese_attack()
+        CH.system_solve()
+        args.plaintext=CH.print_value()
         print(args.plaintext)
         return
 
@@ -566,6 +590,9 @@ class RSAAttack(object):
             if self.args.verbose:
                 print("[*] Performing common modulus attack.")
             self.commonmodulus()
+            if self.args.verbose:
+                print("[*] Performing common chinese attack.")
+            self.chinese()
             try:
                 if self.plaintext is not None:
                     quit()
@@ -613,7 +640,7 @@ class RSAAttack(object):
     implemented_attacks = [nullattack, hastads, factordb, pastctfprimes,
                            mersenne_primes, noveltyprimes, smallq, wiener,
                            comfact_cn, primefac, fermat, siqs, Pollard_p_1,
-                           commonmodulus]
+                           commonmodulus, chinese]
 
 
 # source http://stackoverflow.com/a/22348885

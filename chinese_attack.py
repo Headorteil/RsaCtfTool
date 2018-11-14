@@ -7,13 +7,11 @@ class chinese_attack:
         self.ln = [1]*len(self.attackobjs)
         self.ntot = 0
         self.m = 0
-        self.len = 0
         self.test = False
     def system_solve(self)
     """
     This function find the solution of the congruency system
     """
-        self.len = len(self.attackobjs)
         for i in range(self.len):
             self.ntot *= self.attackobjs[k].pub_key.n
             for j in range(self.len):
@@ -22,7 +20,7 @@ class chinese_attack:
         for i in range(self.len):
             self.ln[i] *= gmpy2.invert(self.ln[i], self.attackobjs[k].pub_key.n)
         for i in range(self.len):
-            self.m += self.attackobjs[k].pub_key.cipher * self.ln[i]
+            self.m += self.attackobjs[k].cipherdec * self.ln[i]
         self.m = m % self.ntot
 
         self.m, self.test = gmpy2.iroot(self.m, 3)
@@ -30,3 +28,7 @@ class chinese_attack:
         if not self.test:
                 print("Racine non entiere")
                 exit()
+        def print_value(self):
+            self.m=str(hex(self.m))[2:] #long
+            self.m=binascii.unhexlify(self.m)
+            return self.m
