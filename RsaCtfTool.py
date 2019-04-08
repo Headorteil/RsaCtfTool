@@ -467,14 +467,16 @@ class RSAAttack(object):
         try:
             for i in range(self.len):
                 self.attackobjs[i].cipherdec = int(binascii.hexlify(
-                                            base64.b64decode(self.attackobjs[k].cipher)
+                                            base64.b64decode(self.attackobjs[i].cipher)
                                             ),16)
         except binascii.Error:
             for i in range(self.len):
                 self.attackobjs[i].cipherdec = int(binascii.hexlify(
-                                            self.attackobjs[k].cipher)
+                                            self.attackobjs[i].cipher)
                                             ,16)
-        CM = CommonModulusAttack()
+        except:
+            return
+        CM = CommonModulusAttack(self.attackobjs)
         CM.extended_euclidean()
         CM.modular_inverse()
         args.plaintext=CM.print_value()
@@ -490,19 +492,22 @@ class RSAAttack(object):
             return
         # Chinese attack
         self.len = len(self.attackobjs)
+        if self.len<3:
+            print("Insuffisant number of arguments")
+            return
         try:
             for i in range(self.len):
                 self.attackobjs[i].cipherdec = int(binascii.hexlify(
-                                            base64.b64decode(self.attackobjs[k].cipher)
+                                            base64.b64decode(self.attackobjs[i].cipher)
                                             ),16)
         except binascii.Error:
             for i in range(self.len):
                 self.attackobjs[i].cipherdec = int(binascii.hexlify(
-                                            self.attackobjs[k].cipher)
+                                            self.attackobjs[i].cipher)
                                             ,16)
-        CH = chinese_attack()
+        CH = chinese_attack(self.attackobjs)
         CH.system_solve()
-        args.plaintext=CH.print_value()
+        args.plaintext = CH.print_value()
         print(args.plaintext)
         return
 
@@ -586,7 +591,7 @@ class RSAAttack(object):
         if self.attackobjs is not None:
             if self.args.verbose:
                 print("[*] Performing common factors attack.")
-            self.commonfactors()
+            #self.commonfactors()
             if self.args.verbose:
                 print("[*] Performing common modulus attack.")
             self.commonmodulus()

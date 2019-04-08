@@ -19,6 +19,7 @@ Attacks :
  - Elliptic Curve Method
  - Pollards p-1 for relatively smooth numbers
  - Mersenne primes factorization
+ - Chinese theorem attack
 
 ## Usage:
 
@@ -27,7 +28,7 @@ usage: RsaCtfTool.py [-h] [--publickey PUBLICKEY] [--createpub] [--dumpkey]
                      [--uncipherfile UNCIPHERFILE] [--uncipher UNCIPHER]
                      [--verbose] [--private] [--ecmdigits ECMDIGITS] [-n N]
                      [-p P] [-q Q] [-e E] [--key KEY]
-                     [--attack {hastads,factordb,pastctfprimes,mersenne_primes,noveltyprimes,smallq,wiener,comfact_cn,primefac,fermat,siqs,Pollard_p_1,commonmodulus,all}]
+                     [--attack {hastads,factordb,pastctfprimes,mersenne_primes,noveltyprimes,smallq,wiener,comfact_cn,primefac,fermat,siqs,Pollard_p_1,commonmodulus,chinese,all}]
 ```
 
 Mode 1 - Attack RSA (specify --publickey)

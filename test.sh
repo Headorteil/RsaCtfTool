@@ -18,6 +18,8 @@ echo "Test wiener"
 ./RsaCtfTool.py --publickey examples/wiener.pub --verbose --private --uncipherfile examples/wiener.cipher --attack wiener
 echo "Test commonfactors"
 ./RsaCtfTool.py --publickey examples/common_factor.pub --verbose --private --uncipherfile examples/common_factor.cipher
+echo "Test chinese theorem attack"
+./RsaCtfTool.py --publickey "examples/chinese_?.pub" --verbose --uncipherfile "examples/chinese_?.cipher"
 echo "Test commonmodulus"
 ./RsaCtfTool.py --publickey "examples/common_modulus_?.pub" --verbose --uncipherfile "examples/common_modulus_?.cipher"
 echo "Test fermat"
