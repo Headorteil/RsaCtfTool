@@ -461,7 +461,7 @@ class RSAAttack(object):
         # Common modulus attack
         if self.attackobjs[0].pub_key.n != self.attackobjs[1].pub_key.n:
             if self.args.verbose:
-                print("Modulus are not equal, common modulus attack impossible.")
+                print("Modulus are not equal, common modulus attack is impossible.")
             return
         self.len = len(self.attackobjs)
         try:
@@ -495,6 +495,11 @@ class RSAAttack(object):
         if self.len<3:
             print("Insuffisant number of arguments")
             return
+        for i in self.attackobjs:
+            if i.pub_key.e != self.attackobjs[0].pub_key.e:
+                if self.args.verbose:
+                    print("Exposants are not equal, chinese attack is impossible.")
+                return
         try:
             for i in range(self.len):
                 self.attackobjs[i].cipherdec = int(binascii.hexlify(

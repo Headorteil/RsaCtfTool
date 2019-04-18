@@ -11,6 +11,7 @@ class chinese_attack():
         self.m = 0
         self.test = False
         self.attackobjs = attackobjs
+        self.e = attackobjs[0].pub_key.e
 
     def system_solve(self):
         """ This function find the solution of the congruency system """
@@ -24,7 +25,7 @@ class chinese_attack():
         for i in range(self.len):
             self.m += self.attackobjs[i].cipherdec * self.ln[i]
         self.m = self.m % self.ntot
-        self.m, self.test = gmpy2.iroot(self.m, 3)
+        self.m, self.test = gmpy2.iroot(self.m, self.e)
         if not self.test:
             print("Miscalculation")
             exit()
