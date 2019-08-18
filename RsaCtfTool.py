@@ -112,6 +112,7 @@ class RSAAttack(object):
         if '*' in args.publickey or '?' in args.publickey:
             # get list of public keys from wildcard expression
             self.pubkeyfilelist = glob(args.publickey)
+            self.pubkeyfilelist.sort()
             self.args = args
             self.attackobjs = []
             if args.verbose:
@@ -122,6 +123,7 @@ class RSAAttack(object):
             if args.uncipherfile is not None and any(i in 'abs*' for i in ['*','?']):
                 # get list of ciphers from wildcard expression
                 self.uncipherlist = glob(args.uncipherfile)
+                self.uncipherlist.sort()
                 if len(self.uncipherlist) != len(self.pubkeyfilelist):
                     if args.verbose:
                         print("It has to be the same number of keys and ciphers")
@@ -601,7 +603,7 @@ class RSAAttack(object):
                 print("[*] Performing common modulus attack.")
             self.commonmodulus()
             if self.args.verbose:
-                print("[*] Performing common chinese attack.")
+                print("[*] Performing chinese attack.")
             self.chinese()
             try:
                 if self.plaintext is not None:
@@ -649,8 +651,7 @@ class RSAAttack(object):
 
     implemented_attacks = [nullattack, hastads, factordb, pastctfprimes,
                            mersenne_primes, noveltyprimes, smallq, wiener,
-                           comfact_cn, primefac, fermat, siqs, Pollard_p_1,
-                           commonmodulus, chinese]
+                           comfact_cn, primefac, fermat, siqs, Pollard_p_1]
 
 
 # source http://stackoverflow.com/a/22348885
